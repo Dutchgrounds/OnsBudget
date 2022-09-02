@@ -1,0 +1,21 @@
+﻿@import "bootstrap/bootstrap.scss";
+@import "_vars.scss";
+@import "_blazor.scss";
+@import "_typography.scss";
+@import "_bootstrap-overrides.scss";
+
+
+.statusgroup
+{
+    btn, .btn:focus, .btn:active:focus, .btn.active:focus,
+    .btn.focus, .btn:active.focus, .btn.active.focus
+    {
+        outline: none !important;
+        box-shadow: none !important
+    }
+}
+
+h1:focus-visible
+{
+    outline: none !important;
+}

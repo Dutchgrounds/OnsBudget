@@ -1,0 +1,114 @@
+﻿@font-face
+{
+    font-family: "Delivery Regular";
+    src: url("/css/fonts/Delivery_W_Rg.woff2") format("woff2"), url("/css/fonts/Delivery_W_Rg.woff") format("woff");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face
+{
+    font-family: "Delivery Black Condensed";
+    src: url("/css/fonts/Delivery_W_CdBlk.woff2") format("woff2"), url("/css/fonts/Delivery_W_CdBlk.woff") format("woff");
+    font-weight: 900;
+    font-style: normal;
+}
+
+@font-face
+{
+    font-family: "Delivery Bold";
+    src: url("/css/fonts/Delivery_W_Bd.woff2") format("woff2"), url("/css/fonts/Delivery_W_Bd.woff") format("woff");
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face
+{
+    font-family: "Delivery Light";
+    src: url("/css/fonts/Delivery_W_Lt.woff2") format("woff2"), url("/css/fonts/Delivery_W_Lt.woff") format("woff");
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face
+{
+    font-family: "Delivery Light Condensed";
+    src: url("/css/fonts/Delivery_W_CdLt.woff2") format("woff2"), url("/css/fonts/Delivery_W_300t.woff") format("woff");
+    font-weight: 300;
+    font-style: normal;
+}
+
+*
+{
+    font-family: "Delivery Regular", sans-serif;
+}
+
+h1
+{
+    font-family: 'Delivery Black Condensed';
+}
+
+h2
+{
+    font-style: normal;
+    font-weight: 700;
+    font-size: 20px;
+}
+
+h3
+{
+    font-family: 'Delivery Black Condensed';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 20px;
+    color: #D40511;
+}
+
+.validation-message {
+    color:red;
+}
+
+.lh-16
+{
+    line-height: 16px;
+}
+
+.lh-18
+{
+    line-height: 18px;
+}
+
+.lh-20
+{
+    line-height: 20px;
+}
+
+.lh-24
+{
+    line-height: 24px;
+}
+
+.lh-28
+{
+    line-height: 28px;
+}
+
+.lh-32
+{
+    line-height: 32px;
+}
+
+.lh-38
+{
+    line-height: 38px;
+}
+
+.lh-42
+{
+    line-height: 42px;
+}
+
+.lh-50
+{
+    line-height: 50px;
+}
