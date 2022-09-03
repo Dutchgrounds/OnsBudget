@@ -18,11 +18,18 @@ namespace OnsBudget.Web
 
             // Add services to the container.
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+
             builder.Services.AddDbContext<OnsBudgetDbContext>(options =>
                 {
                     options.UseSqlServer(connectionString);
                     options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
                 });
+
+
+            builder.Logging.ClearProviders( );
+            builder.Logging.AddLog4Net( );
+
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
             builder.Services.AddDefaultIdentity<AppUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<OnsBudgetDbContext>();
             builder.Services.AddRazorPages();
