@@ -1,3 +1,4 @@
+using DevExpress.Blazor;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
 using OnsBudget.Data;
 using OnsBudget.Data.Entities;
+using OnsBudget.Data.Services;
 using OnsBudget.Web.Areas.Identity;
 
 namespace OnsBudget.Web
@@ -35,7 +37,11 @@ namespace OnsBudget.Web
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();
             builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<AppUser>>();
+            builder.Services.AddTransient<ImportService>( );
 
+            // Add DevExpress
+            builder.Services.AddDevExpressBlazor( configure => configure.BootstrapVersion = BootstrapVersion.v5 );
+            builder.WebHost.UseStaticWebAssets( );
 
             var app = builder.Build();
 

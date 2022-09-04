@@ -1,4 +1,8 @@
 ﻿@page "/"
+@using System.Text
+@using OnsBudget.Data.Services
+
+@inject ImportService ImportService
 
 <PageTitle>Index</PageTitle>
 
@@ -6,4 +10,26 @@
 
 Welcome to your new app.
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+<DxButton CssClass="btn btn-primary" >button</DxButton>
+
+<InputFile OnChange="@LoadFiles"></InputFile>
+
+@code
+{
+    private async Task LoadFiles( InputFileChangeEventArgs e )
+    {
+        var uploadFile = e.File;
+
+        var memoryStream = new MemoryStream( );
+        await uploadFile.OpenReadStream().CopyToAsync(memoryStream);
+
+        memoryStream.Position = 0;
+
+        using var reader = new StreamReader( memoryStream, Encoding.ASCII );
+        string line;
+        while( ( line = reader.ReadLine( ) ) != null )
+        {
+            ImportService.ImportLine( line );
+        }
+    }
+}
