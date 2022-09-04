@@ -16,6 +16,7 @@ namespace OnsBudget.Data.Entities
         public int? ParentId { get; set; }
         public Category Parent { get; set; }
         public ICollection<Category> Children { get; set; }
+        public ICollection<Transaction> Transactions { get; set; }
     }
 
     public class CategoryMapping : IEntityTypeConfiguration<Category>

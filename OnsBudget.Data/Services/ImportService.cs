@@ -42,7 +42,7 @@ namespace OnsBudget.Data.Services
         {
             var parts = line.Split( ";" );
 
-            var transaction = new Transaction( );
+            var transaction = new Transaction( ) { };
 
             transaction.Date = GetDate(parts[0].Substring(1,8) );
             transaction.Name = StripQuotes( parts[1] );

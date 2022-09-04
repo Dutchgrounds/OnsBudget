@@ -20,6 +20,8 @@ namespace OnsBudget.Data.Entities
         public BijAf BijAf { get; set; }
         public string Remark { get; set; } = string.Empty;
         public Decimal Amount { get; set; }
+        public Category Category { get; set; }
+        public int CategoryId { get; set; }
 
         public override string ToString()
         {
@@ -43,6 +45,7 @@ namespace OnsBudget.Data.Entities
             builder.Property(x => x.BijAf).IsRequired(true);
             builder.Property(x => x.Amount).IsRequired(true).HasPrecision(18, 2);
             builder.Property(x => x.Remark).IsRequired(false);
+            builder.HasOne( x => x.Category ).WithMany( x => x.Transactions ).HasForeignKey( x => x.CategoryId );
         }
     }
 }
