@@ -27,6 +27,7 @@ namespace OnsBudget.Web
                     options.UseSqlServer(connectionString);
                     options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
                 });
+            builder.Services.AddDbContextFactory<OnsBudgetDbContext>( options => options.UseSqlServer( connectionString ), ServiceLifetime.Transient );
 
 
             builder.Logging.ClearProviders( );

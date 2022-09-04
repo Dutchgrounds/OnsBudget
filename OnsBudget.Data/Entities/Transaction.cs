@@ -29,7 +29,7 @@ namespace OnsBudget.Data.Entities
         }
     }
 
-    public class CategoryMapping : IEntityTypeConfiguration<Transaction>
+    public class TransactionMapping : IEntityTypeConfiguration<Transaction>
     {
         public void Configure(EntityTypeBuilder<Transaction> builder)
         {

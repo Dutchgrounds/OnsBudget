@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using OnsBudget.Data.Entities;
 using OnsBudget.Data.Enums;
 
@@ -11,7 +13,32 @@ namespace OnsBudget.Data.Services
 {
     public class ImportService
     {
-        public Transaction ImportLine( string line )
+        private readonly IDbContextFactory<OnsBudgetDbContext> dbFactory;
+
+        public ImportService(IDbContextFactory<OnsBudgetDbContext> dbFactory )
+        {
+            this.dbFactory = dbFactory;
+        }
+
+        public async Task ImportFile( StreamReader streamReader )
+        {
+            await using var db = await dbFactory.CreateDbContextAsync( );
+
+            string line;
+            var index = 0;
+            while ( ( line = streamReader.ReadLine( ) ) != null )
+            {
+                if(index > 0)
+                {
+                    var transaction = await ImportLine( line );
+                    await db.Transactions.AddAsync( transaction );
+                }
+                    
+                index++;
+            }
+        }
+
+        public async Task<Transaction> ImportLine( string line )
         {
             var parts = line.Split( ";" );
 
@@ -35,7 +62,7 @@ namespace OnsBudget.Data.Services
 
             transaction.Amount = bedrag;
             transaction.Remark = StripQuotes( parts[ 8 ] );
-
+            
             return transaction;
         }
 

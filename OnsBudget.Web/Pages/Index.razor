@@ -26,10 +26,7 @@ Welcome to your new app.
         memoryStream.Position = 0;
 
         using var reader = new StreamReader( memoryStream, Encoding.ASCII );
-        string line;
-        while( ( line = reader.ReadLine( ) ) != null )
-        {
-            ImportService.ImportLine( line );
-        }
+
+        await ImportService.ImportFile( reader );
     }
 }

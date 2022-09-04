@@ -8,6 +8,9 @@
   },
   "author": "",
   "license": "ISC",
+  "dependencies": {
+    "glob-parent": ">=5.1.2"
+  },
   "devDependencies": {
     "gulp": "^4.0.2",
     "gulp-cached": "^1.1.1",
