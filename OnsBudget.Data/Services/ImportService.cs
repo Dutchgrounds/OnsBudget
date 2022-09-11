@@ -26,28 +26,31 @@ namespace OnsBudget.Data.Services
 
             string line;
             var index = 0;
-            while ( ( line = streamReader.ReadLine( ) ) != null )
+            while ( ( line = streamReader.ReadLine( )! ) != null )
             {
                 if(index > 0)
                 {
-                    var transaction = await ImportLine( line );
+                    var transaction = ImportLine( line );
                     await db.Transactions.AddAsync( transaction );
+                    await db.SaveChangesAsync();
                 }
                     
                 index++;
             }
         }
 
-        public async Task<Transaction> ImportLine( string line )
+        public Transaction ImportLine( string line )
         {
             var parts = line.Split( ";" );
 
-            var transaction = new Transaction( ) { };
+            var transaction = new Transaction
+            {
+                CategoryId = 1,
+                Date = GetDate(parts[0].Substring(1,8) ),
+                Name = StripQuotes( parts[1] ),
+                AccountNumber = StripQuotes( parts[ 2 ] )
+            };
 
-            transaction.Date = GetDate(parts[0].Substring(1,8) );
-            transaction.Name = StripQuotes( parts[1] );
-            transaction.AccountNumber = StripQuotes( parts[ 2 ] );
-            
             var counterAccountNumber = parts[ 3 ];
             if( counterAccountNumber != "\"\"" )
             {
@@ -57,11 +60,15 @@ namespace OnsBudget.Data.Services
             var code = StripQuotes( parts[ 4 ] );
             transaction.TransactieType = (TransactieType)Enum.Parse( typeof(TransactieType ), code );
 
+            var bijaf = StripQuotes( parts[ 5 ] );
+            transaction.BijAf = (BijAf)Enum.Parse( typeof(BijAf ), bijaf );
+
             Decimal bedrag = 0;
             decimal.TryParse(StripQuotes( parts[ 6 ] ), NumberStyles.AllowDecimalPoint, new CultureInfo( "nl-NL" ), out bedrag );
 
             transaction.Amount = bedrag;
             transaction.Remark = StripQuotes( parts[ 8 ] );
+            transaction.CategoryId = 1;
             
             return transaction;
         }

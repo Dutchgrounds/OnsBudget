@@ -20,7 +20,7 @@ namespace OnsBudget.Data.Entities
         public BijAf BijAf { get; set; }
         public string Remark { get; set; } = string.Empty;
         public Decimal Amount { get; set; }
-        public Category Category { get; set; }
+        public Category Category { get; set; } = new Category( ) { Id = 1 };
         public int CategoryId { get; set; }
 
         public override string ToString()

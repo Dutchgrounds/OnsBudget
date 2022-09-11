@@ -1,0 +1,100 @@
+﻿@page "/assigntocategory"
+@using System.Text
+@using OnsBudget.Data.Models
+@using OnsBudget.Data.Services
+
+@inject ImportService ImportService
+@inject TransactionService TransactionService
+@inject CategoryService CategoryService
+
+<PageTitle>Toewijzen categorieën</PageTitle>
+<h1>Toewijzen categorieën</h1>
+
+<DxGrid Data="@transactions" PagerVisible="false" PageSize="int.MaxValue">
+    <Columns>
+        <DxGridDataColumn FieldName=@nameof( TransactionListModel.Date ) DisplayFormat="dd-MM-yyyy" Caption="Datum" />
+        <DxGridDataColumn FieldName=@nameof( TransactionListModel.Name ) Caption="Naam / omschrijving" />
+        <DxGridDataColumn FieldName=@nameof( TransactionListModel.Amount ) DisplayFormat="c" Caption="Bedrag" />
+        <DxGridDataColumn FieldName=@nameof( TransactionListModel.Id ) Caption="Category">
+            <CellDisplayTemplate>
+                @(((context.DataItem as TransactionListModel)!).CategoryName)
+            </CellDisplayTemplate>
+        </DxGridDataColumn>
+        <DxGridDataColumn FieldName=@nameof( TransactionListModel.TransactieTypeAsString ) Caption="Transactie type" />
+        <DxGridDataColumn FieldName=@nameof( TransactionListModel.Id ) AllowSort="false" Width="120px" TextAlignment="GridTextAlignment.Center">
+            <CellDisplayTemplate><button class="btn btn-link grid-btn-link" @onclick="( ) => ShowDetails( (int)context.Value )">Select</button></CellDisplayTemplate>
+            <HeaderCaptionTemplate>Set Category</HeaderCaptionTemplate>
+        </DxGridDataColumn>
+    </Columns>
+</DxGrid>
+
+<DxPopup @bind-Visible="@PopupVisible" HeaderText="Set categorie" HorizontalAlignment="HorizontalAlignment.Center" VerticalAlignment="VerticalAlignment.Center" ShowFooter="true">
+    <BodyTemplate>
+        <DxTreeView Data="@categoryNodes" AllowSelectNodes="true" SelectionChanged="@SelectionChanged">
+            <DataMappings>
+                <DxTreeViewDataMapping Children="Children" Text="Name"  />
+            </DataMappings>
+        </DxTreeView>
+    </BodyTemplate>
+    <FooterContentTemplate>
+        <DxButton CssClass="popup-button" RenderStyle="ButtonRenderStyle.Primary" Text="OK" Click="@SetCategory" />
+        <DxButton CssClass="popup-button" RenderStyle="ButtonRenderStyle.Secondary" Text="Cancel" Click="@Cancel" />
+    </FooterContentTemplate>
+</DxPopup>
+
+@code
+{
+    TransactionListModel CurrentTransaction { get; set; } = new TransactionListModel( ) { Id = 0 };
+    bool PopupVisible
+    {
+        get => CurrentTransaction.Id > 0;
+        set
+        {
+            if( value == false )
+            {
+
+            }
+        }
+    }
+
+    
+    private List<CategoryTreeModel> categoryNodes = new List<CategoryTreeModel>();
+    private CategoryTreeModel selectedNode = new CategoryTreeModel() { Name = string.Empty };
+    private List<TransactionListModel> transactions = new List<TransactionListModel>();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            transactions = await TransactionService.GetAllUnAssigned();
+            categoryNodes = await CategoryService.GetCategoryTree();
+
+            StateHasChanged();
+        }
+    }
+
+    void ShowDetails(int transactionId)
+    {
+        CurrentTransaction = transactions.Single(x => x.Id == transactionId);
+    }
+
+    void SelectionChanged(TreeViewNodeEventArgs e)
+    {
+        selectedNode = (CategoryTreeModel)e.NodeInfo.DataItem;
+        InvokeAsync(StateHasChanged);
+    }
+
+    void Cancel( )
+    {
+        CurrentTransaction = new TransactionListModel( ) { Id = 0 };
+    }
+
+    async Task SetCategory( )
+    {
+        await TransactionService.SetCategory( CurrentTransaction, selectedNode );
+        transactions.Remove( CurrentTransaction );
+
+        CurrentTransaction = new TransactionListModel() { Id = 0 };
+        StateHasChanged();
+    }
+}

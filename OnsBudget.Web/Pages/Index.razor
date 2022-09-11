@@ -1,32 +1,16 @@
 ﻿@page "/"
 @using System.Text
+@using OnsBudget.Data.Models
 @using OnsBudget.Data.Services
 
 @inject ImportService ImportService
+@inject TransactionService TransactionService
+@inject CategoryService CategoryService
 
-<PageTitle>Index</PageTitle>
-
-<h1>Hello, world!</h1>
-
-Welcome to your new app.
-
-<DxButton CssClass="btn btn-primary" >button</DxButton>
-
-<InputFile OnChange="@LoadFiles"></InputFile>
+<PageTitle>Dashboard</PageTitle>
+<h1>Dashboard</h1>
 
 @code
 {
-    private async Task LoadFiles( InputFileChangeEventArgs e )
-    {
-        var uploadFile = e.File;
-
-        var memoryStream = new MemoryStream( );
-        await uploadFile.OpenReadStream().CopyToAsync(memoryStream);
-
-        memoryStream.Position = 0;
-
-        using var reader = new StreamReader( memoryStream, Encoding.ASCII );
-
-        await ImportService.ImportFile( reader );
-    }
+    
 }

@@ -1,0 +1,58 @@
+﻿@page "/uploaddata"
+@using System.Text
+@using OnsBudget.Data.Models
+@using OnsBudget.Data.Services
+
+@inject ImportService ImportService
+@inject TransactionService TransactionService
+@inject CategoryService CategoryService
+
+<PageTitle>Upload data</PageTitle>
+<h1>Upload data</h1>
+
+<p>Selecteer het export bestand van de ING</p>
+<InputFile OnChange="@LoadFiles"></InputFile>
+
+<DxPopup @bind-Visible="@PopupVisible" HeaderText="Set categorie" HorizontalAlignment="HorizontalAlignment.Center" VerticalAlignment="VerticalAlignment.Center">
+    <BodyTemplate>
+        
+    </BodyTemplate>
+    <FooterContentTemplate>
+        <DxButton CssClass="popup-button" RenderStyle="ButtonRenderStyle.Primary" Text="OK" Click="@(( ) => PopupVisible = false)" />
+    </FooterContentTemplate>
+</DxPopup>
+
+@code
+{
+    TransactionListModel? CurrentTransaction { get; set; }
+    bool PopupVisible { get; set; }
+    
+
+    private async Task LoadFiles(InputFileChangeEventArgs e)
+    {
+        var uploadFile = e.File;
+
+        var memoryStream = new MemoryStream();
+        await uploadFile.OpenReadStream(99999999).CopyToAsync(memoryStream);
+
+        memoryStream.Position = 0;
+
+        using var reader = new StreamReader(memoryStream, Encoding.ASCII);
+
+        await ImportService.ImportFile(reader);
+
+    }
+
+    // protected override async Task OnAfterRenderAsync(bool firstRender)
+    // {
+    //     if (firstRender)
+    //     {
+    //         transactions = await TransactionService.GetAllInkomsten();
+    //         categoryNodes = await CategoryService.GetCategoryTree();
+    //
+    //         StateHasChanged();
+    //     }
+    // }
+
+
+}

@@ -39,6 +39,8 @@ namespace OnsBudget.Web
             builder.Services.AddServerSideBlazor();
             builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<AppUser>>();
             builder.Services.AddTransient<ImportService>( );
+            builder.Services.AddTransient<TransactionService>( );
+            builder.Services.AddTransient<CategoryService>( );
 
             // Add DevExpress
             builder.Services.AddDevExpressBlazor( configure => configure.BootstrapVersion = BootstrapVersion.v5 );
