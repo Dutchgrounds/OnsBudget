@@ -1,0 +1,21 @@
+﻿.page-detail
+{
+    width: 100%;
+
+    .form
+    {
+        display: flex;
+
+        .left
+        {
+            background-color: red;
+            flex-grow: 1;
+        }
+
+        .right
+        {
+            background-color: green;
+            flex-grow: 1;
+        }
+    }
+}
