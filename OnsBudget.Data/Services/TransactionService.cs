@@ -67,7 +67,7 @@ namespace OnsBudget.Data.Services
         {
             await using var db = await dbFactory.CreateDbContextAsync( );
 
-            List<TransactionListModel> transactions = await db.Transactions.Where( x => x.CategoryId == Constants.Categories.Unassigned ).OrderBy(x => x.Id).Include( x => x.Category ).Take(20).Select( x => new TransactionListModel( )
+            List<TransactionListModel> transactions = await db.Transactions.Where( x => x.CategoryId == Constants.Categories.Unassigned ).OrderByDescending(x => x.Id).Include( x => x.Category ).Take(20).Select( x => new TransactionListModel( )
             {
                 Id = x.Id,
                 AccountNumber = x.AccountNumber,

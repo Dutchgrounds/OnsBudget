@@ -1,0 +1,30 @@
+﻿@page "/managecategories"
+@using OnsBudget.Data.Models
+@using OnsBudget.Data.Services
+
+@inject CategoryService CategoryService
+
+<PageHeader Title="Categorieën beheren" />
+
+
+@if( nodes.Any( ) )
+{
+    foreach(var node in nodes )
+    {
+        <TreeNode Node="node" Depth="0" Expanded="true"></TreeNode>
+    }
+}
+
+@code
+{
+    private List<CategoryTreeModel> nodes = new List<CategoryTreeModel>( );
+
+    protected override async Task OnAfterRenderAsync( bool firstRender )
+    {
+        if( firstRender )
+        {
+            nodes = await CategoryService.GetCategoryTree( );
+            StateHasChanged();
+        }
+    }
+}

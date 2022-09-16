@@ -14,6 +14,7 @@ namespace OnsBudget.Data.Entities
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public int? ParentId { get; set; }
+        public int SortOrder { get; set; }
         public Category Parent { get; set; }
         public ICollection<Category> Children { get; set; }
         public ICollection<Transaction> Transactions { get; set; }
@@ -27,6 +28,7 @@ namespace OnsBudget.Data.Entities
             builder.ToTable("Categories");
             builder.Property( x => x.Name ).IsRequired( true );
             builder.Property( x => x.ParentId ).IsRequired( false );
+            builder.Property( x => x.SortOrder ).IsRequired( true ).HasDefaultValue( 1 );
             builder.HasOne( x => x.Parent ).WithMany( x => x.Children ).HasForeignKey( x => x.ParentId );
         }
     }

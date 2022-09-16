@@ -7,29 +7,31 @@
 @inject TransactionService TransactionService
 @inject CategoryService CategoryService
 
-<PageTitle>Upload data</PageTitle>
-<h1>Upload data</h1>
+<PageHeader Title="Upload data"/>
 
 <p>Selecteer het export bestand van de ING</p>
 <InputFile OnChange="@LoadFiles"></InputFile>
 
-<DxPopup @bind-Visible="@PopupVisible" HeaderText="Set categorie" HorizontalAlignment="HorizontalAlignment.Center" VerticalAlignment="VerticalAlignment.Center">
-    <BodyTemplate>
-        
-    </BodyTemplate>
-    <FooterContentTemplate>
-        <DxButton CssClass="popup-button" RenderStyle="ButtonRenderStyle.Primary" Text="OK" Click="@(( ) => PopupVisible = false)" />
-    </FooterContentTemplate>
-</DxPopup>
+
+@if( model.Show )
+{
+    <div>
+        <p>Import results:</p>
+        <br/>
+        <p>Nieuwe regels geimporteerd : @model.NewCounter</p>
+        <p>Duplicate regels overgeslagen : @model.DuplicateCounter</p>
+    </div>
+}
+
 
 @code
 {
-    TransactionListModel? CurrentTransaction { get; set; }
-    bool PopupVisible { get; set; }
+    ImportResult model = new ImportResult( ) { Show = false };
     
-
     private async Task LoadFiles(InputFileChangeEventArgs e)
     {
+        model = new ImportResult() { Show = false };
+
         var uploadFile = e.File;
 
         var memoryStream = new MemoryStream();
@@ -39,8 +41,8 @@
 
         using var reader = new StreamReader(memoryStream, Encoding.ASCII);
 
-        await ImportService.ImportFile(reader);
-
+        model = await ImportService.ImportFile(reader);
+        StateHasChanged();
     }
 
     // protected override async Task OnAfterRenderAsync(bool firstRender)

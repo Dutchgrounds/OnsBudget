@@ -7,8 +7,7 @@
 @inject TransactionService TransactionService
 @inject CategoryService CategoryService
 
-<PageTitle>Toewijzen categorieën</PageTitle>
-<h1>Toewijzen categorieën</h1>
+<PageHeader Title="Toewijzen categorieën" />
 
 <DxGrid Data="@transactions" PagerVisible="false" PageSize="int.MaxValue">
     <Columns>
@@ -30,7 +29,7 @@
 
 <DxPopup @bind-Visible="@PopupVisible" HeaderText="Set categorie" HorizontalAlignment="HorizontalAlignment.Center" VerticalAlignment="VerticalAlignment.Center" ShowFooter="true">
     <BodyTemplate>
-        <DxTreeView Data="@categoryNodes" AllowSelectNodes="true" SelectionChanged="@SelectionChanged">
+        <DxTreeView Data="@categoryNodes" AllowSelectNodes="true" SelectionChanged="@SelectionChanged" CssClass="m-2">
             <DataMappings>
                 <DxTreeViewDataMapping Children="Children" Text="Name"  />
             </DataMappings>

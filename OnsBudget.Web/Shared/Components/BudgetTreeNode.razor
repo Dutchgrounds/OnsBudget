@@ -1,0 +1,41 @@
+﻿@using OnsBudget.Data.Models
+@using System.Globalization
+
+@if( loaded )
+{
+    <div class="row">
+        <div class="col-3 d-flex">
+            <div style="width: @(Node.Depth * 20)px;">&nbsp;</div>
+            <div class="w-100 border-bottom" style="">@Node.Name</div>
+        </div>
+        <div class="col-1 border-bottom">
+            <span><strong>@Node.AmountTotal</strong></span>
+        </div>
+        <div class="col-8">
+            <div style="width: @(Node.Percentage.ToString(CultureInfo.CreateSpecificCulture("en-US")))%; background-color: blueviolet">&nbsp;</div>
+        </div>
+    </div>
+    
+    @if( Node.Children.Any( ) )
+    {
+        foreach( var child in Node.Children )
+        {
+            <BudgetTreeNode Node="@child"></BudgetTreeNode>
+        }
+    }
+}
+
+@code
+{
+    [Parameter]
+    public BudgetCategoryTreeModel Node { get; set; }
+
+    private bool loaded = false;
+
+    protected override void OnParametersSet( )
+    {
+        loaded = true;
+
+        StateHasChanged();
+    }
+}

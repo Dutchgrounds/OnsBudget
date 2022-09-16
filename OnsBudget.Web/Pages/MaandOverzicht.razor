@@ -1,4 +1,31 @@
 ﻿@page "/maandoverzicht"
 
-<PageTitle>Maand overzicht</PageTitle>
-<h1>Maand overzicht</h1>
+@using OnsBudget.Data.Models
+@using OnsBudget.Data.Services
+
+@inject CategoryService CategoryService
+
+<PageHeader Title="Maand overzicht"/>
+
+@if( nodes.Any( ) )
+{
+    foreach( var node in nodes )
+    {
+        <BudgetTreeNode Node="node"></BudgetTreeNode>
+    }
+}
+
+@code
+{
+    private List<BudgetCategoryTreeModel> nodes = new List<BudgetCategoryTreeModel>();
+
+    protected override async Task OnAfterRenderAsync( bool firstRender )
+    {
+        if( firstRender )
+        {
+            nodes = await CategoryService.GetBudgetCategoryTree( );
+            StateHasChanged( );
+        }
+    }
+}
+

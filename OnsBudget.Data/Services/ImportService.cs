@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using OnsBudget.Data.Entities;
 using OnsBudget.Data.Enums;
+using OnsBudget.Data.Models;
+using OnsBudget.Data.Shared;
 
 namespace OnsBudget.Data.Services
 {
@@ -20,23 +22,44 @@ namespace OnsBudget.Data.Services
             this.dbFactory = dbFactory;
         }
 
-        public async Task ImportFile( StreamReader streamReader )
+        public async Task<ImportResult> ImportFile( StreamReader streamReader )
         {
             await using var db = await dbFactory.CreateDbContextAsync( );
 
             string line;
             var index = 0;
+            var duplicateCounter = 0;
+            var newCounter = 0;
             while ( ( line = streamReader.ReadLine( )! ) != null )
             {
                 if(index > 0)
                 {
                     var transaction = ImportLine( line );
-                    await db.Transactions.AddAsync( transaction );
-                    await db.SaveChangesAsync();
+                    
+
+                    //check if not duplicate!
+                    var duplicates = await db.Transactions.AnyAsync( x => x.Amount == transaction.Amount && x.Name == transaction.Name && x.Date == transaction.Date );
+
+                    if( !duplicates )
+                    {
+                        transaction.CategoryId = 1;
+                        transaction.Category = db.Categories.AsTracking().Single( x => x.Id == Constants.Categories.Unassigned );
+                        await db.Transactions.AddAsync( transaction );
+                        await db.SaveChangesAsync( );
+
+                        newCounter++;
+                    }
+                    else
+                    {
+                        duplicateCounter++;
+                    }
+                    
                 }
                     
                 index++;
             }
+
+            return new ImportResult { Show = true, NewCounter = newCounter, DuplicateCounter = duplicateCounter };
         }
 
         public Transaction ImportLine( string line )
@@ -68,7 +91,6 @@ namespace OnsBudget.Data.Services
 
             transaction.Amount = bedrag;
             transaction.Remark = StripQuotes( parts[ 8 ] );
-            transaction.CategoryId = 1;
             
             return transaction;
         }
