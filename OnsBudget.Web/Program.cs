@@ -1,4 +1,6 @@
 using DevExpress.Blazor;
+using MemBus;
+using MemBus.Configurators;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
@@ -28,8 +30,7 @@ namespace OnsBudget.Web
                     options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
                 });
             builder.Services.AddDbContextFactory<OnsBudgetDbContext>( options => options.UseSqlServer( connectionString ), ServiceLifetime.Transient );
-
-
+            
             builder.Logging.ClearProviders( );
             builder.Logging.AddLog4Net( );
 
@@ -41,6 +42,7 @@ namespace OnsBudget.Web
             builder.Services.AddTransient<ImportService>( );
             builder.Services.AddTransient<TransactionService>( );
             builder.Services.AddTransient<CategoryService>( );
+            builder.Services.AddScoped( ( sp ) => BusSetup.StartWith<Conservative>( ).Construct( ) );
 
             // Add DevExpress
             builder.Services.AddDevExpressBlazor( configure => configure.BootstrapVersion = BootstrapVersion.v5 );

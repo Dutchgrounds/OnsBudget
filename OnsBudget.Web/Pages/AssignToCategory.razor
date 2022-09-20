@@ -12,7 +12,15 @@
 <DxGrid Data="@transactions" PagerVisible="false" PageSize="int.MaxValue">
     <Columns>
         <DxGridDataColumn FieldName=@nameof( TransactionListModel.Date ) DisplayFormat="dd-MM-yyyy" Caption="Datum" />
-        <DxGridDataColumn FieldName=@nameof( TransactionListModel.Name ) Caption="Naam / omschrijving" />
+        <DxGridDataColumn FieldName=@nameof( TransactionListModel.Name ) Caption="Naam / omschrijving">
+            <CellDisplayTemplate>
+                @{ var dataItem = (context.DataItem as TransactionListModel); }
+                <span>@dataItem!.Name</span>
+                <div class="float-end clickable" @onclick="@( ( ) => OnClickShowMelding( dataItem.Id ) )">
+                    <i class="fa-solid fa-ellipsis-vertical lh-24 ms-3 me-3 mt-1 mb-1"></i>
+                </div>
+            </CellDisplayTemplate>
+        </DxGridDataColumn>
         <DxGridDataColumn FieldName=@nameof( TransactionListModel.Amount ) DisplayFormat="c" Caption="Bedrag" />
         <DxGridDataColumn FieldName=@nameof( TransactionListModel.Id ) Caption="Category">
             <CellDisplayTemplate>
@@ -27,7 +35,8 @@
     </Columns>
 </DxGrid>
 
-<DxPopup @bind-Visible="@PopupVisible" HeaderText="Set categorie" HorizontalAlignment="HorizontalAlignment.Center" VerticalAlignment="VerticalAlignment.Center" ShowFooter="true">
+<DxPopup @bind-Visible="@PopupVisible" HeaderText="Set categorie" HorizontalAlignment="HorizontalAlignment.Center" VerticalAlignment="VerticalAlignment.Center" 
+         ShowFooter="true" CloseOnEscape="false" CloseOnOutsideClick="false" ShowCloseButton="false">
     <BodyTemplate>
         <DxTreeView Data="@categoryNodes" AllowSelectNodes="true" SelectionChanged="@SelectionChanged" CssClass="m-2">
             <DataMappings>
@@ -38,6 +47,17 @@
     <FooterContentTemplate>
         <DxButton CssClass="popup-button" RenderStyle="ButtonRenderStyle.Primary" Text="OK" Click="@SetCategory" />
         <DxButton CssClass="popup-button" RenderStyle="ButtonRenderStyle.Secondary" Text="Cancel" Click="@Cancel" />
+    </FooterContentTemplate>
+</DxPopup>
+
+<DxPopup HeaderText="Melding" @bind-Visible="@MeldingPopupVisible">
+    <BodyTemplate>
+        <div class="p-2">
+            @Melding
+        </div>
+    </BodyTemplate>
+    <FooterContentTemplate>
+        <DxButton CssClass="popup-button" RenderStyle="ButtonRenderStyle.Primary" Text="OK" @onclick="@(( ) => MeldingPopupVisible = false)" />
     </FooterContentTemplate>
 </DxPopup>
 
@@ -56,6 +76,8 @@
         }
     }
 
+    private bool MeldingPopupVisible { get; set; }
+    private string Melding { get; set; } = string.Empty;
     
     private List<CategoryTreeModel> categoryNodes = new List<CategoryTreeModel>();
     private CategoryTreeModel selectedNode = new CategoryTreeModel() { Name = string.Empty };
@@ -95,5 +117,11 @@
 
         CurrentTransaction = new TransactionListModel() { Id = 0 };
         StateHasChanged();
+    }
+
+    void OnClickShowMelding( int transactionId )
+    {
+        Melding = transactions.Single( x => x.Id == transactionId ).Remark;
+        MeldingPopupVisible = true;
     }
 }

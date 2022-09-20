@@ -1,10 +1,14 @@
-﻿/*@import "bootstrap/bootstrap.scss";
+﻿@import "bootstrap/bootstrap.scss";
 @import "_vars.scss";
 @import "_blazor.scss";
 @import "_typography.scss";
-@import "_bootstrap-overrides.scss";*/
+@import "_bootstrap-overrides.scss";
 
 h1:focus-visible
 {
     outline: none !important;
+}
+
+.clickable:hover {
+    cursor:pointer;
 }

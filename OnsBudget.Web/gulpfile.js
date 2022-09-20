@@ -52,4 +52,4 @@ function sassWatchIsolated( )
     return watch( isolatedFolders, series( 'sass-isolated' ) );
 };
 
-task( 'sass:watch', parallel( sassWatchIsolated, sassWatchShared ) );
+task( 'default', parallel( sassWatchIsolated, sassWatchShared ) );

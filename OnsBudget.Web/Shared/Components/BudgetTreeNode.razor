@@ -3,7 +3,8 @@
 
 @if( loaded )
 {
-    <div class="row">
+    @* @(Node.Depth == 0 ? "mb-3" : "mb-1")" *@
+    <div class="row mb-1">
         <div class="col-3 d-flex">
             <div style="width: @(Node.Depth * 20)px;">&nbsp;</div>
             <div class="w-100 border-bottom" style="">@Node.Name</div>
@@ -21,6 +22,10 @@
         foreach( var child in Node.Children )
         {
             <BudgetTreeNode Node="@child"></BudgetTreeNode>
+        }
+        if( Node.Depth == 0 )
+        {
+            <br />
         }
     }
 }

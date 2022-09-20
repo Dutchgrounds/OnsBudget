@@ -11,6 +11,7 @@
     <PackageReference Include="DevExpress.Blazor" Version="22.1.4" />
     <PackageReference Include="Enums.NET" Version="4.0.0" />
     <PackageReference Include="log4net" Version="2.0.15" />
+    <PackageReference Include="MemBus" Version="4.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.8" />
@@ -22,5 +23,9 @@
   <ItemGroup>
     <ProjectReference Include="..\OnsBudget.Data\OnsBudget.Data.csproj" />
   </ItemGroup>
+
+	<ItemGroup>
+		<Script Include="**" Exclude="*.esproj;node_modules\**" />
+	</ItemGroup>
 
 </Project>

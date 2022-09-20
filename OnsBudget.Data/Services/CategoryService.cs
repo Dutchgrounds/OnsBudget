@@ -1,27 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using OnsBudget.Data.Entities;
 using OnsBudget.Data.Models;
+using OnsBudget.Data.Shared;
 
 namespace OnsBudget.Data.Services
 {
     public class CategoryService
     {
         private readonly IDbContextFactory<OnsBudgetDbContext> dbFactory;
+        private readonly ILogger<CategoryService> logger;
 
-        public CategoryService(IDbContextFactory<OnsBudgetDbContext> dbFactory )
+        public CategoryService(IDbContextFactory<OnsBudgetDbContext> dbFactory, ILogger<CategoryService> logger )
         {
             this.dbFactory = dbFactory;
+            this.logger = logger;
         }
 
         public async Task<List<CategoryTreeModel>> GetCategoryTree( )
         {
             await using var db = await dbFactory.CreateDbContextAsync( );
 
-            var nodes = await db.Categories.Where(x => x.Id > 1).Select( x => new CategoryTreeModel( ) { Id = x.Id, Name = x.Name, ParentId = x.ParentId, SortOrder = x.SortOrder, Children = new List<CategoryTreeModel>( ) } ).ToListAsync( );
+            var nodes = await db.Categories
+                                .Where(x => x.Id > Constants.Categories.Unassigned)
+                                .OrderBy( x => x.SortOrder )
+                                .Select( x => new CategoryTreeModel( )
+                                {
+                                    Id = x.Id, 
+                                    Name = x.Name, 
+                                    ParentId = x.ParentId, 
+                                    SortOrder = x.SortOrder
+                                } ).ToListAsync( );
 
             foreach( var node in nodes )
             {
@@ -38,16 +47,14 @@ namespace OnsBudget.Data.Services
             await using var db = await dbFactory.CreateDbContextAsync( );
 
             var nodes = await db.Categories
-                                .Where( x => x.Id > 1 )
+                                .Where( x => x.Id > Constants.Categories.Unassigned )
+                                .OrderBy(x => x.SortOrder)
                                 .Select( x => new BudgetCategoryTreeModel( )
                                 {
                                     Id = x.Id, 
                                     Name = x.Name, 
                                     ParentId = x.ParentId, 
-                                    SortOrder = x.SortOrder, 
-                                    Amount = 0,
-                                    AmountChildren = 0,
-                                    Children = new List<BudgetCategoryTreeModel>( )
+                                    SortOrder = x.SortOrder
                                 } ).ToListAsync( );
 
             var groupedAmounts = db.Transactions
@@ -63,7 +70,7 @@ namespace OnsBudget.Data.Services
             {
                 if( groupedAmounts.Any( x => x.Key == node.Id ) )
                 {
-                    node.Amount = groupedAmounts.SingleOrDefault( x => x.Key == node.Id ).Sum;
+                    node.Amount = groupedAmounts.Single( x => x.Key == node.Id ).Sum;
                 }
                 
                 node.Children = nodes.Where( x => x.ParentId == node.Id ).OrderBy( x => x.SortOrder ).ToList( );
@@ -71,7 +78,7 @@ namespace OnsBudget.Data.Services
 
             foreach( var node in nodes.Where(x => x.ParentId == null) )
             {
-                CalculateChildAmounts(node);
+                CalculateAmoutOfAllChildren(node);
             }
 
             var totalAmount = nodes.Sum( x => x.Amount );
@@ -85,19 +92,78 @@ namespace OnsBudget.Data.Services
             return result;
         }
 
-        private void CalculateChildAmounts( BudgetCategoryTreeModel node )
+        private void CalculateAmoutOfAllChildren( BudgetCategoryTreeModel node )
         {
             if( node.Children.Any( ) )
             {
                 foreach( var child in node.Children )
                 {
                     child.Depth = node.Depth + 1;
-                    CalculateChildAmounts( child );
+                    CalculateAmoutOfAllChildren( child );
                 }
             }
 
             node.AmountChildren = node.Children.Sum( x => x.AmountTotal );
         }
+
+        public async Task AddRootItem( )
+        {
+            await using var db = await dbFactory.CreateDbContextAsync( );
+
+            var maxSortOrder = db.Categories.Where( x => x.ParentId == null ).Max( x => x.SortOrder ) + 1;
+            var rootItem = new Category( ) { Name = "Nieuwe categorie", SortOrder = maxSortOrder };
+            db.Categories.Add( rootItem );
+
+            await db.SaveChangesAsync();
+        }
+
+        public async Task AddChild( int parentId )
+        {
+            await using var db = await dbFactory.CreateDbContextAsync( );
+
+            var lastEntry = db.Categories.OrderBy( x => x.SortOrder ).LastOrDefault( );
+            var maxSortOrder = lastEntry != null ? lastEntry.SortOrder + 1 : 1;
+
+            var rootItem = new Category( ) { Name = $"Nieuwe categorie {DateTime.Now.ToShortTimeString()}", SortOrder = maxSortOrder, ParentId = parentId};
+            db.Categories.Add( rootItem );
+
+            await db.SaveChangesAsync( );
+        }
+
+        public async Task<bool> CanDelete( int categoryId )
+        {
+            await using var db = await dbFactory.CreateDbContextAsync( );
+            
+            var inuse = await db.Transactions.AnyAsync( x => x.CategoryId == categoryId);
+            var hasChildren = await db.Categories.AnyAsync( x => x.ParentId == categoryId );
+            
+            return (inuse || hasChildren) && false;
+        }
         
+        public async Task Delete( int nodeId )
+        {
+            await using var db = await dbFactory.CreateDbContextAsync( );
+
+            var category = await db.Categories.SingleOrDefaultAsync( x => x.Id == nodeId );
+            if( category != null )
+            {
+                db.Categories.Remove( category );
+                await db.SaveChangesAsync( );
+            }
+        }
+
+        public async Task SaveCategory( NodeEditModel nodeEditModel )
+        {
+            await using var db = await dbFactory.CreateDbContextAsync( );
+            
+            var category = await db.Categories.AsTracking().SingleOrDefaultAsync( x => x.Id == nodeEditModel.Id );
+            if( category != null )
+            {
+                category.Name = nodeEditModel.Name;
+                //category.ParentId = nodeEditModel.ParentId;
+                
+                await db.SaveChangesAsync( );
+            }
+        }
     }
 }
