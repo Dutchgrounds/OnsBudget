@@ -1,0 +1,166 @@
+﻿@using OnsBudget.Data.Models
+@using OnsBudget.Data.Services
+@using MemBus
+@using Microsoft.AspNetCore.Mvc.ViewFeatures
+@using OnsBudget.Data.Messages
+
+@inject IBus Bus
+@inject CategoryService CategoryService
+@inject ILogger<EditTreeNode> Logger
+
+@if( loaded )
+{
+    <div>
+        <div class="lh-38" style="height: 38px;">
+            <div class="d-flex lh-28 border-bottom">
+                <div><i class="fa-solid fa-chevron-up" style="margin-top: 8px;" ></i></div>
+                <div><i class="fa-solid fa-chevron-down ms-2"></i></div>
+                <span class="ms-2 me-2 flex-grow-1">@Node.Name</span>
+                <button class="btn btn-outline-primary btn-sm me-2 float-end" @onclick="@(() => OpenEditNodePopup(Node.Id))">Edit</button>
+                <button class="btn btn-outline-primary btn-sm me-2 float-end" @onclick="@(() => AddChild(Node.Id))">Add child</button>
+                <button class="btn btn-outline-primary btn-sm float-end" @onclick="@(() => OpenDeleteNodePopup(Node.Id))">Delete</button>
+            </div>
+            
+        </div>
+        <div class="ms-3">
+            @if( Node.Children.Any( ) )
+            {
+                foreach( var child in Node.Children )
+                {
+                    <EditTreeNode Node="@child"></EditTreeNode>
+                }
+            }
+        </div>
+    </div>
+}
+
+<DxPopup
+    @bind-Visible="@showNodeEdit"
+    ShowFooter="true"
+    CloseOnEscape="false"
+    CloseOnOutsideClick="false"
+    ShowCloseButton="false"
+    HeaderText="Edit category">
+    @* ReSharper disable once UnusedParameter.Local *@
+    <BodyContentTemplate  Context="name">
+        @* <EditForm  Model="nodeEditModel" OnSubmit="@HandleValidSubmit"> *@
+            <div class="mb-3">
+                <label for="exampleFormControlInput1" class="form-label">Name</label>
+                <input id="exampleFormControlInput1" class="form-control" @bind="nodeEditModel.Name">
+            </div>
+        @* </EditForm> *@
+    </BodyContentTemplate>
+    @* ReSharper disable once UnusedParameter.Local *@
+    <FooterContentTemplate Context="context">
+        <button type="button" class="btn btn-primary" @onclick="@HandleValidSubmit">OK</button>
+        <button type="button" class="btn btn-primary" @onclick="@(( ) => { showNodeEdit = false; } )">Cancel</button>
+    </FooterContentTemplate>
+</DxPopup>
+
+<DxPopup
+    @bind-Visible="@showConfirmDelete"
+    ShowFooter="true"
+    CloseOnEscape="false"
+    CloseOnOutsideClick="false"
+    ShowCloseButton="false"
+    HeaderText="Edit category">
+    @* ReSharper disable once UnusedParameter.Local *@
+    <BodyContentTemplate Context="bodycontextDeleteId">
+        <p>@ConfirmDeleteMessage</p>
+    </BodyContentTemplate>
+    <FooterContentTemplate>
+        @if( !disableDeleteButton )
+        {
+            <DxButton CssClass="popup-demo-events-button" RenderStyle="ButtonRenderStyle.Primary" Text="OK" Click="DeleteNode"/>    
+        }
+        <DxButton CssClass="popup-demo-events-button" RenderStyle="ButtonRenderStyle.Secondary" Text="Cancel" Click="@(( ) => { showConfirmDelete = false; } )"/>
+    </FooterContentTemplate>
+</DxPopup>
+
+
+@code
+{
+    [Parameter]
+#pragma warning disable CS8618
+        public CategoryTreeModel Node { get; set; }
+#pragma warning restore CS8618
+
+
+    private bool loaded = false;
+    
+    private bool showNodeEdit = false;
+    private NodeEditModel nodeEditModel = new NodeEditModel( );
+    //private EditContext editNodeContext;
+
+    private bool showConfirmDelete = false;
+    private string ConfirmDeleteMessage { get; set; } = "Weet u zeker dat u deze node wilt verwijderen?";
+    private bool disableDeleteButton = false;
+
+    protected override void OnAfterRender( bool firstRender )
+    {
+        if( firstRender )
+        {
+            //editNodeContext = new EditContext( nodeEditModel );
+        }
+    }
+
+    protected override void OnParametersSet( )
+    {
+        loaded = true;
+    }
+
+    private void OnClickMoveUp( int categoryId )
+    {
+        StateHasChanged( );
+    }
+
+    private void OnClickMoveDown(int categoryId)
+    {
+        StateHasChanged();
+    }
+
+    private async Task AddChild( int parentId)
+    {
+        await CategoryService.AddChild( parentId );
+        await Bus.PublishAsync( new TreeChangedMessage() );
+    }
+
+    private void OpenEditNodePopup(int categoryId)
+    {
+        nodeEditModel.Id = categoryId;
+        nodeEditModel.Name = Node.Name;
+        showNodeEdit = true;
+    }
+    
+    private async Task HandleValidSubmit( )
+    {
+        Logger.LogDebug("HandleValidSubmit");
+        await CategoryService.SaveCategory( nodeEditModel );
+
+        showNodeEdit = false;
+        await Bus.PublishAsync( new TreeChangedMessage( ) );
+    }
+
+    private async Task DeleteNode( )
+    {
+        await CategoryService.Delete( Node.Id );
+        await Bus.PublishAsync( new TreeChangedMessage( ) );
+    }
+
+    private async Task OpenDeleteNodePopup( int nodeId )
+    {
+        var canDelete = await CategoryService.CanDelete( nodeId );
+        if( canDelete )
+        {
+            disableDeleteButton = false;
+            ConfirmDeleteMessage = "Weet u zeker dat u deze node wilt verwijderen?";
+            showConfirmDelete = true;
+        }
+        else
+        {
+            disableDeleteButton = true;
+            ConfirmDeleteMessage = "Deze node kan niet verwijderd worden omdat er nog subnodes aan hangen.";
+            showConfirmDelete = true;
+        }
+    }
+}
