@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EnumsNET;
+﻿using EnumsNET;
 using Microsoft.EntityFrameworkCore;
 using OnsBudget.Data.Enums;
 using OnsBudget.Data.Models;
@@ -54,6 +49,19 @@ namespace OnsBudget.Data.Services
             transaction.CategoryId = categoryTreeModel.Id;
 
             await db.SaveChangesAsync( );
+        }
+
+        public async Task Hide( TransactionListModel currentTransaction )
+        {
+            await using var db = await dbFactory.CreateDbContextAsync( );
+            var transaction = await db.Transactions.AsTracking( ).SingleAsync( x => x.Id == currentTransaction.Id );
+            transaction.Hidden = true;
+            await db.SaveChangesAsync( );
+        }
+
+        public async Task<List<TransactionListModel>> GetTransactions( )
+        {
+            return new List<TransactionListModel>( );
         }
     }
 }

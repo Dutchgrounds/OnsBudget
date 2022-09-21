@@ -26,11 +26,10 @@ namespace OnsBudget.Data.Services
         {
             await using var db = await dbFactory.CreateDbContextAsync( );
 
-            string line;
             var index = 0;
             var duplicateCounter = 0;
             var newCounter = 0;
-            while ( ( line = streamReader.ReadLine( )! ) != null )
+            while ( streamReader.ReadLine( )! is {} line )
             {
                 if(index > 0)
                 {
@@ -38,8 +37,7 @@ namespace OnsBudget.Data.Services
                     
 
                     //check if not duplicate!
-                    var duplicates = await db.Transactions.AnyAsync( x => x.Amount == transaction.Amount && x.Name == transaction.Name && x.Date == transaction.Date );
-
+                    var duplicates = await db.Transactions.AnyAsync( x => x.Amount == transaction.Amount && x.Name == transaction.Name && x.Date == transaction.Date && x.Remark == transaction.Remark );
                     if( !duplicates )
                     {
                         transaction.CategoryId = 1;

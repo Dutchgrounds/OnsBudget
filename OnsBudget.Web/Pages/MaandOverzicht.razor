@@ -2,28 +2,50 @@
 
 @using OnsBudget.Data.Models
 @using OnsBudget.Data.Services
+@using System.Collections
 
 @inject CategoryService CategoryService
+@inject TransactionService TransactionService
 
 <PageHeader Title="Maand overzicht"/>
 
-@if( nodes.Any( ) )
-{
-    foreach( var node in nodes )
-    {
-        <BudgetTreeNode Node="node"></BudgetTreeNode>
-    }
-}
+<div class="row">
+    <div class="col-md-12 col-lg-6">
+        @if( nodes.Any( ) )
+        {
+            foreach( var node in nodes )
+            {
+                <BudgetTreeNode Node="node"></BudgetTreeNode>
+            }
+        }        
+    </div>
+    <div class="col-md-12 col-lg-6">
+        
+    </div>
+</div>
+
+
+<h2>Details</h2>
+
+@* @if( details.Any( ) ) *@
+@* { *@
+@*     foreach( var detail in details ) *@
+@*     { *@
+@*         <BudgetDetail Detail="detail"></BudgetDetail> *@
+@*     } *@
+@* } *@
 
 @code
 {
     private List<BudgetCategoryTreeModel> nodes = new List<BudgetCategoryTreeModel>();
+    private List<TransactionListModel> details = new List<TransactionListModel>();
 
     protected override async Task OnAfterRenderAsync( bool firstRender )
     {
         if( firstRender )
         {
             nodes = await CategoryService.GetBudgetCategoryTree( );
+            details = await TransactionService.GetTransactions( );
             StateHasChanged( );
         }
     }

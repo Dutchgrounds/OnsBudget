@@ -1,18 +1,18 @@
 ﻿@using OnsBudget.Data.Models
 
-@if( Loaded )
+@if( loaded )
 {
     <div>
         <div class="lh-38" @onclick="OnClickExpand">
-            @if( Node.Children.Any( ) )
+            @if(Node!.Children.Any( ) )
             {
-                <i class="fa-solid @ExpandedClass me-2" ></i>
+                <i class="fa-solid @expandedClass me-2" ></i>
             }
             else
             {
                 <span style="margin-right: 20px;"></span>
             }
-            <span>@Node.Name</span>
+            <span>@Node!.Name</span>
         </div>
         @if( Expanded )
         {
@@ -21,7 +21,7 @@
                 {
                     foreach( var child in Node.Children )
                     {
-                        <TreeNode Node="@child" Depth="@ChildDepth" Expanded="@Expanded"></TreeNode>
+                        <TreeNode Node="@child" Depth="@childDepth" Expanded="@Expanded"></TreeNode>
                     }
                 }
             </div>
@@ -32,34 +32,33 @@
 @code
 {
     [Parameter]
-    public CategoryTreeModel Node { get; set; }
+    public CategoryTreeModel? Node { get; set; }
 
     [Parameter]
     public int Depth { get; set; }
 
     [Parameter]
-    public bool Expanded { get; set; } = false;
+    public bool Expanded { get; set; } 
 
-    private int ChildDepth = 0;
+    private int childDepth;
 
-    private string ExpandedClass = string.Empty;
+    private string expandedClass = string.Empty;
 
-    private bool Loaded = false;
+    private bool loaded;
 
-    private bool ExpandChildren = false;
 
     protected override void OnParametersSet( )
     {
-        ChildDepth = Depth + 1;
-        Loaded = true;
+        childDepth = Depth + 1;
+        loaded = true;
 
-        ExpandedClass = Expanded ? "fa-chevron-down" : "fa-chevron-right";
+        expandedClass = Expanded ? "fa-chevron-down" : "fa-chevron-right";
     }
 
     private void OnClickExpand( MouseEventArgs obj )
     {
         Expanded = !Expanded;
-        ExpandedClass = Expanded ? "fa-chevron-down" : "fa-chevron-right";
+        expandedClass = Expanded ? "fa-chevron-down" : "fa-chevron-right";
 
         StateHasChanged( );
     }

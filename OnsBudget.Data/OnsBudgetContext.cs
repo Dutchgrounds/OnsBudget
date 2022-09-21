@@ -17,10 +17,12 @@ namespace OnsBudget.Data
 #pragma warning restore CS8618
         {}
 
+        
         protected override void OnModelCreating( ModelBuilder builder )
         {
             base.OnModelCreating( builder );
 
+            builder.Entity<Transaction>().HasQueryFilter(x => x.Hidden == false);
             builder.ApplyConfigurationsFromAssembly( Assembly.GetExecutingAssembly( ) );
         }
 

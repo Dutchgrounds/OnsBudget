@@ -26,13 +26,12 @@
 @code
 {
     private List<CategoryTreeModel> nodes = new List<CategoryTreeModel>( );
-    private IDisposable bus;
 
     protected override async Task OnAfterRenderAsync( bool firstRender )
     {
         if( firstRender )
         {
-            bus = Bus.Subscribe<TreeChangedMessage>(e =>
+            Bus.Subscribe<TreeChangedMessage>(_ =>
             {
                 InvokeAsync( async ( ) =>
                 {

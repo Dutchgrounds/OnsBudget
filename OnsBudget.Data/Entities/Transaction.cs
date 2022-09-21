@@ -22,6 +22,7 @@ namespace OnsBudget.Data.Entities
         public Decimal Amount { get; set; }
         public Category Category { get; set; } = new Category( ) { Id = 1 };
         public int CategoryId { get; set; }
+        public bool Hidden { get; set; } = false;
 
         public override string ToString()
         {
@@ -45,6 +46,7 @@ namespace OnsBudget.Data.Entities
             builder.Property(x => x.BijAf).IsRequired(true);
             builder.Property(x => x.Amount).IsRequired(true).HasPrecision(18, 2);
             builder.Property(x => x.Remark).IsRequired(false);
+            builder.Property(x => x.Hidden).IsRequired(true).HasDefaultValue(false);
             builder.HasOne( x => x.Category ).WithMany( x => x.Transactions ).HasForeignKey( x => x.CategoryId );
         }
     }

@@ -1,12 +1,25 @@
 ﻿@using OnsBudget.Data.Models
 @using System.Globalization
+@using MemBus
+@using OnsBudget.Data.Messages
+
+@inject IBus Bus
+
+<style>
+    .row {
+        background-color: #f0f0f0;
+    }
+    
+    .selectedCategory {
+        color: red;
+    }
+</style>
 
 @if( loaded )
 {
-    @* @(Node.Depth == 0 ? "mb-3" : "mb-1")" *@
-    <div class="row mb-1">
+    <div class="row mb-1 clickable selectedCategory">
         <div class="col-3 d-flex">
-            <div style="width: @(Node.Depth * 20)px;">&nbsp;</div>
+            <div style="width: @(Node!.Depth * 20)px;">&nbsp;</div>
             <div class="w-100 border-bottom" style="">@Node.Name</div>
         </div>
         <div class="col-1 border-bottom">
@@ -33,13 +46,19 @@
 @code
 {
     [Parameter]
-    public BudgetCategoryTreeModel Node { get; set; }
+    public BudgetCategoryTreeModel? Node { get; set; }
 
     private bool loaded = false;
+    private bool isSelected = false;
 
     protected override void OnParametersSet( )
     {
         loaded = true;
+
+        Bus.Subscribe<CategorySelectedMessage>( e => 
+        {
+            isSelected = Node!.Id == e.SeletectCategoryId;
+        } );
 
         StateHasChanged();
     }

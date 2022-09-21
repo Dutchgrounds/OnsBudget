@@ -28,14 +28,17 @@
             </CellDisplayTemplate>
         </DxGridDataColumn>
         <DxGridDataColumn FieldName=@nameof( TransactionListModel.TransactieTypeAsString ) Caption="Transactie type" />
-        <DxGridDataColumn FieldName=@nameof( TransactionListModel.Id ) AllowSort="false" Width="120px" TextAlignment="GridTextAlignment.Center">
-            <CellDisplayTemplate><button class="btn btn-link grid-btn-link" @onclick="( ) => ShowDetails( (int)context.Value )">Select</button></CellDisplayTemplate>
-            <HeaderCaptionTemplate>Set Category</HeaderCaptionTemplate>
+        <DxGridDataColumn FieldName=@nameof( TransactionListModel.Id ) AllowSort="false" Width="250px" TextAlignment="GridTextAlignment.Center">
+            <CellDisplayTemplate>
+                <button class="btn btn-link grid-btn-link" @onclick="( ) => ShowDetails( (int)context.Value )">Set Category</button>
+                <button class="btn btn-link grid-btn-link" @onclick="( ) => ShowConfirmation( (int)context.Value )">Hide</button>
+            </CellDisplayTemplate>
+            <HeaderCaptionTemplate>Actions</HeaderCaptionTemplate>
         </DxGridDataColumn>
     </Columns>
 </DxGrid>
 
-<DxPopup @bind-Visible="@PopupVisible" HeaderText="Set categorie" HorizontalAlignment="HorizontalAlignment.Center" VerticalAlignment="VerticalAlignment.Center" 
+<DxPopup @bind-Visible="@SetCategoryPopupVisible" HeaderText="Set categorie" HorizontalAlignment="HorizontalAlignment.Center" VerticalAlignment="VerticalAlignment.Center" 
          ShowFooter="true" CloseOnEscape="false" CloseOnOutsideClick="false" ShowCloseButton="false">
     <BodyTemplate>
         <DxTreeView Data="@categoryNodes" AllowSelectNodes="true" SelectionChanged="@SelectionChanged" CssClass="m-2">
@@ -61,23 +64,28 @@
     </FooterContentTemplate>
 </DxPopup>
 
+<DxPopup HeaderText="Waarschuwing" @bind-Visible="@ConfirmationPopupVisible" HorizontalAlignment="HorizontalAlignment.Center" VerticalAlignment="VerticalAlignment.Center" 
+                                                                                      ShowFooter="true" CloseOnEscape="false" CloseOnOutsideClick="false" ShowCloseButton="false">
+    <BodyTemplate>
+        <div class="p-2">
+            Weet u zeker dat u deze transactie wilt verbergen?
+        </div>
+    </BodyTemplate>
+    <FooterContentTemplate>
+        <DxButton CssClass="popup-button" RenderStyle="ButtonRenderStyle.Primary" Text="OK" @onclick="@HideTransaction" />
+        <DxButton CssClass="popup-button" RenderStyle="ButtonRenderStyle.Secondary" Text="Cancel" @onclick="@(( ) => ConfirmationPopupVisible = false)" />
+    </FooterContentTemplate>
+</DxPopup>
+
 @code
 {
     TransactionListModel CurrentTransaction { get; set; } = new TransactionListModel( ) { Id = 0 };
-    bool PopupVisible
-    {
-        get => CurrentTransaction.Id > 0;
-        set
-        {
-            if( value == false )
-            {
-
-            }
-        }
-    }
+    private bool SetCategoryPopupVisible { get; set; } = false;
 
     private bool MeldingPopupVisible { get; set; }
     private string Melding { get; set; } = string.Empty;
+
+    private bool ConfirmationPopupVisible { get; set; } = false;
     
     private List<CategoryTreeModel> categoryNodes = new List<CategoryTreeModel>();
     private CategoryTreeModel selectedNode = new CategoryTreeModel() { Name = string.Empty };
@@ -97,6 +105,7 @@
     void ShowDetails(int transactionId)
     {
         CurrentTransaction = transactions.Single(x => x.Id == transactionId);
+        SetCategoryPopupVisible = true;
     }
 
     void SelectionChanged(TreeViewNodeEventArgs e)
@@ -108,6 +117,7 @@
     void Cancel( )
     {
         CurrentTransaction = new TransactionListModel( ) { Id = 0 };
+        SetCategoryPopupVisible = false;
     }
 
     async Task SetCategory( )
@@ -116,6 +126,8 @@
         transactions.Remove( CurrentTransaction );
 
         CurrentTransaction = new TransactionListModel() { Id = 0 };
+        SetCategoryPopupVisible = false;
+        
         StateHasChanged();
     }
 
@@ -123,5 +135,20 @@
     {
         Melding = transactions.Single( x => x.Id == transactionId ).Remark;
         MeldingPopupVisible = true;
+    }
+
+    void ShowConfirmation( int transactionId )
+    {
+        CurrentTransaction = transactions.Single( x => x.Id == transactionId );
+        ConfirmationPopupVisible = true;
+    }
+
+    private async Task HideTransaction( )
+    {
+        await TransactionService.Hide( CurrentTransaction );
+        transactions.Remove( CurrentTransaction );
+        ConfirmationPopupVisible = false;
+
+        StateHasChanged( );
     }
 }
